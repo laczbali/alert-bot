@@ -60,7 +60,7 @@ namespace AlertBot.Interactions.Controllers
 			string response;
 			try
 			{
-				response = await HandleInteraction(requestData.Data.Name);
+				response = await HandleInteraction(requestData);
 			}
 			catch(Exception e)
 			{
@@ -83,12 +83,13 @@ namespace AlertBot.Interactions.Controllers
 		/// </summary>
 		/// <param name="interactionName"></param>
 		/// <returns>Response to send to the user</returns>
-		private async Task<string> HandleInteraction(string interactionName)
+		private async Task<string> HandleInteraction(Interaction interaction)
 		{
-			switch(interactionName)
-			{
-				default: throw new ArgumentException($"Unknown interaction [{interactionName}]");
-			}
+			return "ok " + interaction.Data.Name;
+			//switch(interaction.Data.Name)
+			//{
+			//	default: throw new ArgumentException($"Unknown interaction [{interactionName}]");
+			//}
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AlertBot.Interactions.Utils;
+using Newtonsoft.Json.Linq;
 using System.Net.Http.Headers;
 using System.Web;
 
@@ -11,6 +12,7 @@ namespace AlertBot.Interactions.Clients.Twilio
 		private readonly string AuthToken;
 		private readonly string SourceNumber;
 		private readonly string MessagingSID;
+		private readonly string RequestAuth;
 
 		public TwilioClient()
         {
@@ -19,6 +21,9 @@ namespace AlertBot.Interactions.Clients.Twilio
 			this.AuthToken = Environment.GetEnvironmentVariable("alertbot_TwilioAuthToken") ?? throw new Exception("Env var [alertbot_TwilioAuthToken] is unset");
 			this.SourceNumber = Environment.GetEnvironmentVariable("alertbot_TwilioSourceNumber") ?? throw new Exception("Env var [alertbot_TwilioSourceNumber] is unset");
 			this.MessagingSID = Environment.GetEnvironmentVariable("alertbot_TwilioMessagingSID") ?? throw new Exception("Env var [alertbot_TwilioMessagingSID] is unset");
+
+			var authString = $"{this.AccountSID}:{this.AuthToken}";
+			this.RequestAuth = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(authString));
 		}
 
 		/// <summary>
@@ -68,27 +73,15 @@ namespace AlertBot.Interactions.Clients.Twilio
 			await MakeHttpRequestAsync(url , values);
 		}
 
-		private async Task<string> MakeHttpRequestAsync(string url, Dictionary<string, string> content)
+		private async Task MakeHttpRequestAsync(string url, Dictionary<string, string> content)
 		{
-			var client = new HttpClient();
-			client.BaseAddress = new Uri(url);
-			client.DefaultRequestHeaders.Clear();
-			client.DefaultRequestHeaders.ConnectionClose = true;
-
-			var authString = $"{this.AccountSID}:{this.AuthToken}";
-			var encodedAuth = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes(authString));
-
-			var requestMessage = new HttpRequestMessage(HttpMethod.Post, "");
-			requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encodedAuth);
-			requestMessage.Content = new FormUrlEncodedContent(content);
-
-			var result = await client.SendAsync(requestMessage);
-			string responseBody = result.Content.ReadAsStringAsync().Result;
-			if (!result.IsSuccessStatusCode)
-			{
-				throw new Exception($"{result.StatusCode} - {responseBody}");
-			}
-			return responseBody;
+			var client = new HttpClientWrapper();
+			await client.MakeRequestAsync(
+				url,
+				HttpMethod.Post,
+				new FormUrlEncodedContent(content),
+				"Basic",
+				this.RequestAuth);
 		}
-    }
+	}
 }

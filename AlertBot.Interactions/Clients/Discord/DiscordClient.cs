@@ -1,4 +1,7 @@
-﻿using AlertBot.Interactions.Clients.Discord.Utils.ED25519;
+﻿using AlertBot.Interactions.Clients.AWS;
+using AlertBot.Interactions.Clients.Discord.Models;
+using AlertBot.Interactions.Clients.Discord.Utils.ED25519;
+using AlertBot.Interactions.Utils;
 using System.Text;
 
 namespace AlertBot.Interactions.Clients.Discord
@@ -6,15 +9,37 @@ namespace AlertBot.Interactions.Clients.Discord
     public class DiscordClient
     {
         private readonly string PublicKey;
+		private readonly string BotToken;
+		private readonly string ClientId;
+		private readonly string ApiBaseUrl;
+		private readonly InteractionsProvider interactionsProvider;
 
-        public DiscordClient()
+		public DiscordClient(DynamoDbClient dbClient)
         {
+			this.interactionsProvider = new InteractionsProvider(dbClient);
+			
 			this.PublicKey = Environment.GetEnvironmentVariable("alertbot_DiscordPublicKey") ?? throw new Exception("Env var [alertbot_DiscordPublicKey] is unset");
+			this.BotToken = Environment.GetEnvironmentVariable("alertbot_DiscordBotToken") ?? throw new Exception("Env var [alertbot_DiscordBotToken] is unset"); 
+            this.ClientId = Environment.GetEnvironmentVariable("alertbot_DiscordClientId") ?? throw new Exception("Env var [alertbot_DiscordClientId] is unset");
+            this.ApiBaseUrl = Environment.GetEnvironmentVariable("alertbot_DiscordApiBaseUrl") ?? throw new Exception("Env var [alertbot_DiscordApiBaseUrl] is unset");
 		}
 
         public async Task RegisterGlobalCommands()
         {
+            var globalInteractions = await this.interactionsProvider.GetGlobalCommands();
+			foreach (var item in globalInteractions)
+            {
+                await this.RegisterGlobalCommand(item);
+            }
+        }
+
+        public async Task RegisterGlobalCommand(ApplicationCommand command)
+        {
+            var url = $"{this.ApiBaseUrl}/applications/{this.ClientId}/commands";
             
+            var httpClient = new HttpClientWrapper();
+            await httpClient.MakeRequestAsync(url, HttpMethod.Post, command, "Bot", this.BotToken);
+            return;
         }
 
         public bool InteractionRequestIsValid(IHeaderDictionary requestHeaders, string requestBody)
