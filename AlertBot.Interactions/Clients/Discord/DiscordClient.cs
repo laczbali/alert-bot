@@ -14,7 +14,7 @@ namespace AlertBot.Interactions.Clients.Discord
 
         public async Task RegisterGlobalCommands()
         {
-            System.Diagnostics.Debug.WriteLine("testing");
+            
         }
 
         public bool InteractionRequestIsValid(IHeaderDictionary requestHeaders, string requestBody)

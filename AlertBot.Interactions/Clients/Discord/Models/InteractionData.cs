@@ -4,7 +4,7 @@
 	{
 		public string Id { get; set; }
 		public string Name { get; set; }
-		public ApplicationCommandTypes Type { get; set; }
+		public ApplicationCommandType Type { get; set; }
 		public object Resolved { get; set; }
 		public ApplicationCommandInteractionDataOption[] Options { get; set; }
 		public string GuildId { get; set; }
