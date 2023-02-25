@@ -16,7 +16,7 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 // Configure custom services
 builder.Services.AddSingleton<DiscordClient>();
-builder.Services.AddSingleton<S3Client>();
+builder.Services.AddSingleton<DynamoDbClient>();
 builder.Services.AddSingleton<TwilioClient>();
 
 // finish setup

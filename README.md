@@ -3,13 +3,12 @@
 It is meant to send SMS messages on command, using Twilio.
 
 **Requirements**
-- Slash command to register a new phone number `/reg-number [display-name] [phone-number]`
-- Slash command to send message to registered number `/send-message [number-display-name] [message]`
-- Auth requirements: whitelisted servers (set with env var)
-- Rate limiting (1 call + 1 sms / user / day)
+- Slash command to register a new phone number `/add-contact [display-name] [phone-number]`
+- Slash command to send message to a pre-registered number `/call [number-display-name] [message]`
+- Rate limiting (X call + Y sms / user / day), set by env var
 
 **Optional goals**
-- Voice capability (need further research on how Twilio handles that)
+- Use unregistered phone numbers
 
 # Developer Guide
 **Prerequisites**
