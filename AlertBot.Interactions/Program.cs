@@ -1,6 +1,7 @@
 using AlertBot.Interactions.Clients.AWS;
 using AlertBot.Interactions.Clients.Discord;
 using AlertBot.Interactions.Clients.Twilio;
+using AlertBot.Interactions.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables("alertbot_");
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
+
+	});
 
 // Add AWS Lambda support. When application is run in Lambda Kestrel is swapped out as the web server with Amazon.Lambda.AspNetCoreServer. This
 // package will act as the webserver translating request and responses between the Lambda event source and ASP.NET Core.

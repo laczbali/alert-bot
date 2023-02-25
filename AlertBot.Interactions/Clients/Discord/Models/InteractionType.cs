@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-type
+	/// </summary>
 	public enum InteractionType
 	{
 		PING = 1,

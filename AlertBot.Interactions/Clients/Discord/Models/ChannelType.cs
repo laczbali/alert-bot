@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at:https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+	/// </summary>
 	public enum ChannelType
 	{
 		GUILD_TEXT = 0,

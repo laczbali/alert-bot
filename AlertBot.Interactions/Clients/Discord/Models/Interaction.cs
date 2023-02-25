@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
+	/// </summary>
 	public class Interaction
 	{
 		public string Id { get; set; }

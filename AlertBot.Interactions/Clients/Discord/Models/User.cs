@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/resources/user#user-object
+	/// </summary>
 	public class User
 	{
 		public string Id { get; set; }

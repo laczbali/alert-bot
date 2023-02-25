@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
+	/// </summary>
 	public class ApplicationCommand
 	{
 		public string Id { get; set; }

@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/resources/guild#guild-member-object
+	/// </summary>
 	public class GuildMember
 	{
 		public User User { get; set; }

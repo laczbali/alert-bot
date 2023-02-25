@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/resources/channel#message-object
+	/// </summary>
 	public class Message
 	{
 		public string Id { get; set; }

@@ -1,5 +1,8 @@
 ﻿namespace AlertBot.Interactions.Clients.Discord.Models
 {
+	/// <summary>
+	/// See more at: https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-interaction-callback-type
+	/// </summary>
 	public enum InteractionCallBackType
 	{
 		PONG = 1,
