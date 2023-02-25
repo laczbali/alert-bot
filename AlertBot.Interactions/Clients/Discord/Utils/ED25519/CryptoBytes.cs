@@ -131,7 +131,7 @@ namespace AlertBot.Interactions.Clients.Discord.Utils.ED25519
         /// </summary>
         /// <param name="data">Byte array</param>
         /// <returns>Hex representation of byte array</returns>
-        public static string? ToHexStringUpper(byte[] data)
+        public static string ToHexStringUpper(byte[] data)
         {
             if (data == null)
                 return null;
@@ -153,7 +153,7 @@ namespace AlertBot.Interactions.Clients.Discord.Utils.ED25519
         /// </summary>
         /// <param name="data">Byte array</param>
         /// <returns>Hex representation of byte array</returns>
-        public static string? ToHexStringLower(byte[] data)
+        public static string ToHexStringLower(byte[] data)
         {
             if (data == null)
                 return null;
@@ -174,7 +174,7 @@ namespace AlertBot.Interactions.Clients.Discord.Utils.ED25519
         /// </summary>
         /// <param name="hexString">Hex encoded byte sequence</param>
         /// <returns>Byte array</returns>
-        public static byte[]? FromHexString(string hexString)
+        public static byte[] FromHexString(string hexString)
         {
             if (hexString == null)
                 return null;
@@ -192,7 +192,7 @@ namespace AlertBot.Interactions.Clients.Discord.Utils.ED25519
         /// </summary>
         /// <param name="data">Byte array</param>
         /// <returns>Base 64 encoded data</returns>
-        public static string? ToBase64String(byte[] data)
+        public static string ToBase64String(byte[] data)
         {
             if (data == null)
                 return null;
@@ -204,7 +204,7 @@ namespace AlertBot.Interactions.Clients.Discord.Utils.ED25519
         /// </summary>
         /// <param name="base64String">Base 64 encoded data</param>
         /// <returns>Byte array</returns>
-        public static byte[]? FromBase64String(string base64String)
+        public static byte[] FromBase64String(string base64String)
         {
             if (base64String == null)
                 return null;
