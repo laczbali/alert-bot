@@ -1,11 +1,12 @@
-﻿using AlertBot.Interactions.Clients.AWS;
+﻿using AlertBot.Interactions.Clients.AWS.DynamoDb;
+using AlertBot.Interactions.Clients.AWS.DynamoDb.Models;
 using AlertBot.Interactions.Clients.Discord.Models;
 using AlertBot.Interactions.Clients.Twilio;
 using System.Text.RegularExpressions;
 
 namespace AlertBot.Interactions.Clients.Discord
 {
-	public class InteractionsProvider
+    public class InteractionsProvider
 	{
 		private readonly DynamoDbClient dynamoDbClient;
 		private readonly TwilioClient twilioClient;
@@ -159,7 +160,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.CallRateLimit))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.CallRateLimit, UsageType.Voice, contents, contactNumber))
 						{
 							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
 						}
@@ -204,7 +205,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.CallRateLimit))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.CallRateLimit, UsageType.Voice, contents, number))
 						{
 							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
 						}
@@ -249,7 +250,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.TextRateLimit))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.TextRateLimit, UsageType.Text, contents, contactNumber))
 						{
 							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
 						}
@@ -294,7 +295,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.TextRateLimit))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.TextRateLimit, UsageType.Text, contents, number))
 						{
 							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
 						}
