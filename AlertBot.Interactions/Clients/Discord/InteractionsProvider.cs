@@ -30,6 +30,7 @@ namespace AlertBot.Interactions.Clients.Discord
 
 		// TODO: implement rate limiting
 		// TODO: update contact dropdown in add-contact
+		// TODO: add help interaction
 		
 		/// <summary>
 		/// Returns the list of predefined global interactions
