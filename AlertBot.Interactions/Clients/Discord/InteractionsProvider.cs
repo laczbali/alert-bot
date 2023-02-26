@@ -166,7 +166,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.twilioClient.SendVoiceMessage(contents, contactNumber, GetRequestHost());
-						return $":speech_balloon: Calling {contactNumber} . . .";
+						return $":speech_balloon: Calling {contactNumber} . . .\n> {contents}";
 					}
 				},
 
@@ -211,7 +211,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.twilioClient.SendVoiceMessage(contents, number, GetRequestHost());
-						return $":speech_balloon: Calling {number} . . .";
+						return $":speech_balloon: Calling {number} . . .\n> {contents}";
 					}
 				},
 
@@ -257,7 +257,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.twilioClient.SendTextMessage(contents, contactNumber);
-						return $":envelope: Texting {contactNumber} . . .";
+						return $":envelope: Texting {contactNumber} . . .\n> {contents}";
 					}
 				},
 
@@ -302,7 +302,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.twilioClient.SendTextMessage(contents, number);
-						return $":envelope: Texting {number} . . .";
+						return $":envelope: Texting {number} . . .\n> {contents}";
 					}
 				}
 			};

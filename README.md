@@ -16,6 +16,9 @@ It is meant to send SMS messages or voice calls on command, using Twilio.
 **Optional goals**
 - React to messages (eg if person X is mentioned in a message, send a text message)
 
+**Known issues**
+- Punctuation mark can cause issues in calls in some cases
+
 # Developer Guide
 **Prerequisites**
 - Visual Studio with web development tools installed
