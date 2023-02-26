@@ -39,8 +39,10 @@ app.MapControllers();
 app.MapGet("/", () => "Welcome to running ASP.NET Core Minimal API on AWS Lambda");
 
 // perform startup tasks
+var interactionsProvider = app.Services.GetRequiredService<InteractionsProvider>();
+var globalCommands = await interactionsProvider.GetGlobalCommands();
 var discordClient = app.Services.GetRequiredService<DiscordClient>();
-await discordClient.RegisterGlobalCommands();
+await discordClient.RegisterGlobalCommands(globalCommands);
 
 // run app
 app.Run();

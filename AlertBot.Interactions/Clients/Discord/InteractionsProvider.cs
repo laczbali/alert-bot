@@ -10,17 +10,19 @@ namespace AlertBot.Interactions.Clients.Discord
 		private readonly DynamoDbClient dynamoDbClient;
 		private readonly TwilioClient twilioClient;
 		private readonly IHttpContextAccessor httpContextAccessor;
+		private readonly DiscordClient discordClient;
 		private readonly string PhoneNumberRegex;
 		private readonly int CallContentCarLenLimit;
 		private readonly int TextContentCarLenLimit;
 		private readonly int CallRateLimit;
 		private readonly int TextRateLimit;
 
-		public InteractionsProvider(DynamoDbClient dynamoDbClient, TwilioClient twilioClient, IHttpContextAccessor httpContextAccessor)
+		public InteractionsProvider(DynamoDbClient dynamoDbClient, TwilioClient twilioClient, IHttpContextAccessor httpContextAccessor, DiscordClient discordClient)
 		{
 			this.dynamoDbClient = dynamoDbClient;
 			this.twilioClient = twilioClient;
 			this.httpContextAccessor = httpContextAccessor;
+			this.discordClient = discordClient;
 			this.PhoneNumberRegex = Environment.GetEnvironmentVariable("alertbot_AppPhoneNumberRegex") ?? throw new Exception("Env var [alertbot_AppPhoneNumberRegex] is unset");
 			this.CallContentCarLenLimit = int.Parse(Environment.GetEnvironmentVariable("alertbot_AppCallContentCarLenLimit") ?? throw new Exception("Env var [alertbot_AppCallContentCarLenLimit] is unset"));
 			this.TextContentCarLenLimit = int.Parse(Environment.GetEnvironmentVariable("alertbot_AppTextContentCarLenLimit") ?? throw new Exception("Env var [alertbot_AppTextContentCarLenLimit] is unset"));
@@ -28,9 +30,21 @@ namespace AlertBot.Interactions.Clients.Discord
 			this.TextRateLimit = int.Parse(Environment.GetEnvironmentVariable("alertbot_AppTextRateLimit") ?? throw new Exception("Env var [alertbot_AppTextRateLimit] is unset"));
 		}
 
-		// TODO: implement rate limiting
-		// TODO: update contact dropdown in add-contact
-		// TODO: add help interaction
+		/// <summary>
+		/// Gets the requested Application Command from the predefined Global Command list
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
+		public async Task<ApplicationCommand> GetGlobalCommand(string name)
+		{
+			var command = (await GetGlobalCommands()).FirstOrDefault(c => c.Name == name);
+			if(command == null)
+			{
+				throw new ArgumentException($"No command with name [{name}]");
+			}
+			return command;
+		}
 		
 		/// <summary>
 		/// Returns the list of predefined global interactions
@@ -40,6 +54,23 @@ namespace AlertBot.Interactions.Clients.Discord
 		{
 			return new ApplicationCommand[]
 			{
+				new ApplicationCommand
+				{
+					Name = "alertbot-info",
+					Description = "Displays a help page",
+					Type = ApplicationCommandType.CHAT_INPUT,
+					InteractionHandler = async (Interaction interaction) =>
+					{
+						var commands = await GetGlobalCommands();
+						var commandStrings = commands.Select(c => $"`/{c.Name}`\n    {c.Description}");
+						var commandString = string.Join("\n\n", commandStrings);
+
+						var infoString = "Made by blaczko - https://github.com/laczbali";
+
+						return $"{commandString}\n\n{infoString}";
+					}
+				},
+
 				new ApplicationCommand
 				{
 					Name = "add-contact",
@@ -72,6 +103,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.dynamoDbClient.AddContactAsync(displayName, phoneNumber);
+						UpdateContactDropdowns();
 						return $":blue_book: Added contact `{displayName}` with number `{phoneNumber}`";
 					}
 				},
@@ -127,6 +159,11 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
+						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.CallRateLimit))
+						{
+							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
+						}
+
 						await this.twilioClient.SendVoiceMessage(contents, contactNumber, GetRequestHost());
 						return $":speech_balloon: Calling {contactNumber} . . .";
 					}
@@ -165,6 +202,11 @@ namespace AlertBot.Interactions.Clients.Discord
 						if(contents.Length > this.CallContentCarLenLimit)
 						{
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
+						}
+
+						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.CallRateLimit))
+						{
+							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
 						}
 
 						await this.twilioClient.SendVoiceMessage(contents, number, GetRequestHost());
@@ -207,6 +249,11 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
+						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.TextRateLimit))
+						{
+							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
+						}
+
 						await this.twilioClient.SendTextMessage(contents, contactNumber);
 						return $":envelope: Texting {contactNumber} . . .";
 					}
@@ -245,6 +292,11 @@ namespace AlertBot.Interactions.Clients.Discord
 						if(contents.Length > this.TextContentCarLenLimit)
 						{
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
+						}
+
+						if(!await this.dynamoDbClient.CheckRateLimit(interaction.User.Id, this.TextRateLimit))
+						{
+							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
 						}
 
 						await this.twilioClient.SendTextMessage(contents, number);
@@ -303,6 +355,21 @@ namespace AlertBot.Interactions.Clients.Discord
 		{
 			var regex = new Regex(this.PhoneNumberRegex);
 			return regex.IsMatch(phoneNumber);
+		}
+
+		/// <summary>
+		/// Re-registers all interactions that have an option with a name of "contact"
+		/// </summary>
+		/// <returns></returns>
+		public void UpdateContactDropdowns()
+		{
+			_ = Task.Run(async () =>
+			{
+				var contactInteractions =
+					(await GetGlobalCommands())
+					.Where(interaction => interaction.Options.Any(option => option.Name == "contact"));
+				await this.discordClient.UpdateGlobalCommands(contactInteractions);
+			});
 		}
 
 		/// <summary>

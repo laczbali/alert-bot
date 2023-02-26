@@ -1,5 +1,4 @@
-﻿using AlertBot.Interactions.Clients.AWS;
-using AlertBot.Interactions.Clients.Discord.Models;
+﻿using AlertBot.Interactions.Clients.Discord.Models;
 using AlertBot.Interactions.Clients.Discord.Utils.ED25519;
 using AlertBot.Interactions.Utils;
 using System.Text;
@@ -12,31 +11,22 @@ namespace AlertBot.Interactions.Clients.Discord
 		private readonly string BotToken;
 		private readonly string ClientId;
 		private readonly string ApiBaseUrl;
-		private readonly InteractionsProvider interactionsProvider;
-		private readonly ILogger<DiscordClient> logger;
 
-		public DiscordClient(
-            ILogger<DiscordClient> logger,
-            InteractionsProvider interactionsProvider)
+		public DiscordClient()
         {
-            this.logger = logger;
-            this.interactionsProvider = interactionsProvider;
 			this.PublicKey = Environment.GetEnvironmentVariable("alertbot_DiscordPublicKey") ?? throw new Exception("Env var [alertbot_DiscordPublicKey] is unset");
 			this.BotToken = Environment.GetEnvironmentVariable("alertbot_DiscordBotToken") ?? throw new Exception("Env var [alertbot_DiscordBotToken] is unset"); 
             this.ClientId = Environment.GetEnvironmentVariable("alertbot_DiscordClientId") ?? throw new Exception("Env var [alertbot_DiscordClientId] is unset");
             this.ApiBaseUrl = Environment.GetEnvironmentVariable("alertbot_DiscordApiBaseUrl") ?? throw new Exception("Env var [alertbot_DiscordApiBaseUrl] is unset");
 		}
 
-        public async Task RegisterGlobalCommands()
+        public async Task RegisterGlobalCommands(IEnumerable<ApplicationCommand> commands)
         {
-            var globalInteractions = await this.interactionsProvider.GetGlobalCommands();
-			foreach (var item in globalInteractions)
+			foreach (var item in commands)
             {
                 await this.RegisterGlobalCommand(item);
                 Thread.Sleep(1000);
             }
-
-            this.logger.LogInformation($"Registered {globalInteractions.Length} global commands");
         }
 
         public async Task RegisterGlobalCommand(ApplicationCommand command)
@@ -48,7 +38,9 @@ namespace AlertBot.Interactions.Clients.Discord
             return;
         }
 
-        public bool InteractionRequestIsValid(IHeaderDictionary requestHeaders, string requestBody)
+		public async Task UpdateGlobalCommands(IEnumerable<ApplicationCommand> commands) => await RegisterGlobalCommands(commands);
+
+		public bool InteractionRequestIsValid(IHeaderDictionary requestHeaders, string requestBody)
         {
             var signatureHeader = requestHeaders["X-Signature-Ed25519"].FirstOrDefault();
             var timestampHeader = requestHeaders["X-Signature-Timestamp"].FirstOrDefault();
