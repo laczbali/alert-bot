@@ -6,7 +6,12 @@
 		// - storing rate-limiting state
 		// - storing contacts
 
-		public async Task<Dictionary<string, string>> GetContacts()
+		public async Task AddContactAsync(string name, string number)
+		{
+			return;
+		}
+		
+		public async Task<Dictionary<string, string>> GetContactsAsync()
 		{
 			return new Dictionary<string, string>
 			{

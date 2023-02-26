@@ -13,11 +13,14 @@ namespace AlertBot.Interactions.Clients.Discord
 		private readonly string ClientId;
 		private readonly string ApiBaseUrl;
 		private readonly InteractionsProvider interactionsProvider;
+		private readonly ILogger<DiscordClient> logger;
 
-		public DiscordClient(DynamoDbClient dbClient)
+		public DiscordClient(
+            ILogger<DiscordClient> logger,
+            InteractionsProvider interactionsProvider)
         {
-			this.interactionsProvider = new InteractionsProvider(dbClient);
-			
+            this.logger = logger;
+            this.interactionsProvider = interactionsProvider;
 			this.PublicKey = Environment.GetEnvironmentVariable("alertbot_DiscordPublicKey") ?? throw new Exception("Env var [alertbot_DiscordPublicKey] is unset");
 			this.BotToken = Environment.GetEnvironmentVariable("alertbot_DiscordBotToken") ?? throw new Exception("Env var [alertbot_DiscordBotToken] is unset"); 
             this.ClientId = Environment.GetEnvironmentVariable("alertbot_DiscordClientId") ?? throw new Exception("Env var [alertbot_DiscordClientId] is unset");
@@ -30,7 +33,10 @@ namespace AlertBot.Interactions.Clients.Discord
 			foreach (var item in globalInteractions)
             {
                 await this.RegisterGlobalCommand(item);
+                Thread.Sleep(1000);
             }
+
+            this.logger.LogInformation($"Registered {globalInteractions.Length} global commands");
         }
 
         public async Task RegisterGlobalCommand(ApplicationCommand command)

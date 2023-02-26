@@ -16,6 +16,7 @@ builder.Services
         options.JsonSerializerOptions.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
 
 	});
+builder.Services.AddHttpContextAccessor();
 
 // Add AWS Lambda support. When application is run in Lambda Kestrel is swapped out as the web server with Amazon.Lambda.AspNetCoreServer. This
 // package will act as the webserver translating request and responses between the Lambda event source and ASP.NET Core.
@@ -23,6 +24,7 @@ builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
 // Configure custom services
 builder.Services.AddSingleton<DiscordClient>();
+builder.Services.AddSingleton<InteractionsProvider>();
 builder.Services.AddSingleton<DynamoDbClient>();
 builder.Services.AddSingleton<TwilioClient>();
 

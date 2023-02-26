@@ -1,4 +1,6 @@
-﻿namespace AlertBot.Interactions.Clients.Discord.Models
+﻿using System.Text.Json.Serialization;
+
+namespace AlertBot.Interactions.Clients.Discord.Models
 {
 	/// <summary>
 	/// See more at https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-structure
@@ -19,5 +21,8 @@
 		public bool DefaultPermission { get; set; }
 		public bool Nsfw { get; set; }
 		public string Version { get; set; }
+
+		[JsonIgnore]
+		public Func<Interaction, Task<string>> InteractionHandler { get; set; }
 	}
 }

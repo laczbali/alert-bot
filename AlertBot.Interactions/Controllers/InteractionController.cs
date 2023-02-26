@@ -11,13 +11,16 @@ namespace AlertBot.Interactions.Controllers
 	{
 		private readonly ILogger<InteractionController> logger;
 		private readonly DiscordClient discordClient;
+		private readonly InteractionsProvider interactionsProvider;
 
 		public InteractionController(
 			ILogger<InteractionController> logger,
-			DiscordClient discordClient)
+			DiscordClient discordClient,
+			InteractionsProvider interactionsProvider)
 		{
 			this.logger = logger;
 			this.discordClient = discordClient;
+			this.interactionsProvider = interactionsProvider;
 		}
 
 		[HttpPost]
@@ -60,7 +63,7 @@ namespace AlertBot.Interactions.Controllers
 			string response;
 			try
 			{
-				response = await HandleInteraction(requestData);
+				response = await this.interactionsProvider.HandleInteraction(requestData);
 			}
 			catch(Exception e)
 			{
@@ -76,20 +79,6 @@ namespace AlertBot.Interactions.Controllers
 					content = response
 				}
 			});
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="interactionName"></param>
-		/// <returns>Response to send to the user</returns>
-		private async Task<string> HandleInteraction(Interaction interaction)
-		{
-			return "ok " + interaction.Data.Name;
-			//switch(interaction.Data.Name)
-			//{
-			//	default: throw new ArgumentException($"Unknown interaction [{interactionName}]");
-			//}
 		}
 	}
 }

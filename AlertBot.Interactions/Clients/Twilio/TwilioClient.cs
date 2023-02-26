@@ -50,7 +50,7 @@ namespace AlertBot.Interactions.Clients.Twilio
 		/// </summary>
 		/// <param name="contents">What should the voice call say</param>
 		/// <param name="targetPhoneNumber">Where should it call</param>
-		/// <param name="ourBaseUrl">Redirect URL, Twilio will look here for what message to send.</param>
+		/// <param name="ourBaseUrl">Redirect URL, Twilio will look here for what message to send (eg: https://example.com)</param>
 		/// <returns></returns>
         public async Task SendVoiceMessage(string contents, string targetPhoneNumber, string ourBaseUrl)
         {

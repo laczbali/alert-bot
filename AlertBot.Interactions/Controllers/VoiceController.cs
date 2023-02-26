@@ -7,6 +7,7 @@ namespace AlertBot.Interactions.Controllers
 	[Route("[controller]")]
 	public class VoiceController : Controller
 	{
+		[HttpGet("{message}")]
 		[HttpPost("{message}")]
 		public ContentResult HandlerAsync(string message)
 		{
