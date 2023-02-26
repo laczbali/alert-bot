@@ -25,7 +25,6 @@ namespace AlertBot.Interactions.Clients.Discord
 			foreach (var item in commands)
             {
                 await this.RegisterGlobalCommand(item);
-                Thread.Sleep(1000);
             }
         }
 

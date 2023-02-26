@@ -105,7 +105,20 @@ namespace AlertBot.Interactions.Utils
 			{
 				throw new Exception($"{result.StatusCode} - {responseBody}");
 			}
+			HandleRateLimit(result.Headers);
+
 			return responseBody;
+		}
+
+		private void HandleRateLimit(HttpResponseHeaders headers)
+		{
+			var remaining = int.Parse(headers.GetValues("X-RateLimit-Remaining").FirstOrDefault());
+			if(remaining == 1)
+			{
+				var headerVal = headers.GetValues("X-RateLimit-Reset-After").FirstOrDefault().Replace(".", ",");
+				var resetAfterSec = float.Parse(headerVal);
+				Thread.Sleep((int)(resetAfterSec * 1000));
+			}
 		}
 	}
 }

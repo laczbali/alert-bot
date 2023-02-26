@@ -1,14 +1,20 @@
 # alert-bot
 
-It is meant to send SMS messages on command, using Twilio.
+It is meant to send SMS messages or voice calls on command, using Twilio.
 
-**Requirements**
-- Slash command to register a new phone number `/add-contact [display-name] [phone-number]`
-- Slash command to send message to a pre-registered number `/call [number-display-name] [message]`
+**Features**
+- Slash commands
+  - Help page `/alertbot-info`
+  - Register a new phone number `/add-contact [display-name] [phone-number]`
+  - List contacts `/list-contacts`
+  - Send a voice message to a pre-registered number `/call [number-display-name] [message]`
+  - Send a text message to a pre-registered number `/text [number-display-name] [message]`
+  - Send a voice message to a number `/call-number [number] [message]`
+  - Send a text message to a number `/text-number [number] [message]`
 - Rate limiting (X call + Y sms / user / day), set by env var
 
 **Optional goals**
-- Use unregistered phone numbers
+- React to messages (eg if person X is mentioned in a message, send a text message)
 
 # Developer Guide
 **Prerequisites**
@@ -22,6 +28,33 @@ It is meant to send SMS messages on command, using Twilio.
   - Set it to private
   - Add the interaction endpoint (you need to publish the app first to AWS) `[AWS_URL]/interaction`
 - Install and configure ngrok
+- Create a table in DynamoDB
+  - Partition key: "pk", Sort key: "sk"
+  - Custom settings
+    - DynamoDB standard
+    - On-demand
+    - Owned by Amazon DynamoDB
+  - Set up an IAM user with AmazonDynamoDBFullAccess persmission
+  - Create an access key for the user
+- Set the following env vars in Properties\launchSettings.json
+  - alertbot_AppPhoneNumberRegex
+  - alertbot_AppCallContentCarLenLimit
+  - alertbot_AppTextContentCarLenLimit
+  - alertbot_AppCallRateLimit
+  - alertbot_AppTextRateLimit
+  - alertbot_DiscordInviteUrl
+  - alertbot_DiscordApiBaseUrl
+  - alertbot_DiscordPublicKey
+  - alertbot_DiscordBotToken
+  - alertbot_DiscordClientId
+  - alertbot_TwilioBaseUrl
+  - alertbot_TwilioAccountSID
+  - alertbot_TwilioAuthToken
+  - alertbot_TwilioSourceNumber
+  - alertbot_TwilioMessagingSID
+  - alertbot_DynamoDbAccessKey
+  - alertbot_DynamoDbSecretKey
+  - alertbot_DynamoDbTableName
 
 **Development**
 - Deploy with `dotnet lambda deploy-function` from the project (not solution) directory
