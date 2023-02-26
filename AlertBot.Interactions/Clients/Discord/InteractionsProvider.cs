@@ -66,7 +66,7 @@ namespace AlertBot.Interactions.Clients.Discord
 						var commandStrings = commands.Select(c => $"`/{c.Name}`\n    {c.Description}");
 						var commandString = string.Join("\n\n", commandStrings);
 
-						var infoString = "Made by blaczko - https://github.com/laczbali";
+						var infoString = "Made by blaczko - https://github.com/laczbali/alert-bot";
 
 						return $"{commandString}\n\n{infoString}";
 					}
@@ -104,7 +104,6 @@ namespace AlertBot.Interactions.Clients.Discord
 						}
 
 						await this.dynamoDbClient.AddContactAsync(displayName, phoneNumber);
-						UpdateContactDropdowns();
 						return $":blue_book: Added contact `{displayName}` with number `{phoneNumber}`";
 					}
 				},
@@ -137,11 +136,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							Name = "contact",
 							Description = "Who to call",
 							Type = ApplicationCommandOptionType.STRING,
-							Required = true,
-							Choices =
-								(await this.dynamoDbClient.GetContactsAsync())
-								.Select(contactDict => new ApplicationCommandOptionChoice{ Name = contactDict.Key, Value = contactDict.Value } )
-								.ToArray()
+							Required = true
 						},
 						new ApplicationCommandOption
 						{
@@ -153,14 +148,19 @@ namespace AlertBot.Interactions.Clients.Discord
 					},
 					InteractionHandler = async (Interaction interaction) =>
 					{
-						var contactNumber = GetOptionValue<string>(interaction, "contact");
+						var contactName = GetOptionValue<string>(interaction, "contact");
+						var contactNumber = (await this.dynamoDbClient.GetContactsAsync()).GetValueOrDefault(contactName);
+						if(contactNumber == null)
+						{
+							return $":cry: Sorry, but a contact of {contactName} couldn't be found";
+						}
 						var contents = GetOptionValue<string>(interaction, "contents");
 						if(contents.Length > this.CallContentCarLenLimit)
 						{
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.CallRateLimit, UsageType.Voice, contents, contactNumber))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.Member.User.Id, this.CallRateLimit, UsageType.Voice, contents, contactNumber))
 						{
 							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
 						}
@@ -205,7 +205,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.CallContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.CallRateLimit, UsageType.Voice, contents, number))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.Member.User.Id, this.CallRateLimit, UsageType.Voice, contents, number))
 						{
 							return $":cry: Sorry, you reached the limit of {this.CallRateLimit} calls per person per day";
 						}
@@ -227,11 +227,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							Name = "contact",
 							Description = "Who to send it to",
 							Type = ApplicationCommandOptionType.STRING,
-							Required = true,
-							Choices =
-								(await this.dynamoDbClient.GetContactsAsync())
-								.Select(contactDict => new ApplicationCommandOptionChoice{ Name = contactDict.Key, Value = contactDict.Value } )
-								.ToArray()
+							Required = true
 						},
 						new ApplicationCommandOption
 						{
@@ -243,14 +239,19 @@ namespace AlertBot.Interactions.Clients.Discord
 					},
 					InteractionHandler = async (Interaction interaction) =>
 					{
-						var contactNumber = GetOptionValue<string>(interaction, "contact");
+						var contactName = GetOptionValue<string>(interaction, "contact");
+						var contactNumber = (await this.dynamoDbClient.GetContactsAsync()).GetValueOrDefault(contactName);
+						if(contactNumber == null)
+						{
+							return $":cry: Sorry, but a contact of {contactName} couldn't be found";
+						}
 						var contents = GetOptionValue<string>(interaction, "contents");
 						if(contents.Length > this.TextContentCarLenLimit)
 						{
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.TextRateLimit, UsageType.Text, contents, contactNumber))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.Member.User.Id, this.TextRateLimit, UsageType.Text, contents, contactNumber))
 						{
 							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
 						}
@@ -295,7 +296,7 @@ namespace AlertBot.Interactions.Clients.Discord
 							return $":cry: Sorry, message length must be less then {this.TextContentCarLenLimit} characters, but yours is {contents.Length} long";
 						}
 
-						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.User.Id, this.TextRateLimit, UsageType.Text, contents, number))
+						if(!await this.dynamoDbClient.CheckRateLimitAndLogAsync(interaction.Member.User.Id, this.TextRateLimit, UsageType.Text, contents, number))
 						{
 							return $":cry: Sorry, you reached the limit of {this.TextRateLimit} calls per person per day";
 						}
@@ -356,21 +357,6 @@ namespace AlertBot.Interactions.Clients.Discord
 		{
 			var regex = new Regex(this.PhoneNumberRegex);
 			return regex.IsMatch(phoneNumber);
-		}
-
-		/// <summary>
-		/// Re-registers all interactions that have an option with a name of "contact"
-		/// </summary>
-		/// <returns></returns>
-		public void UpdateContactDropdowns()
-		{
-			_ = Task.Run(async () =>
-			{
-				var contactInteractions =
-					(await GetGlobalCommands())
-					.Where(interaction => interaction.Options.Any(option => option.Name == "contact"));
-				await this.discordClient.UpdateGlobalCommands(contactInteractions);
-			});
 		}
 
 		/// <summary>

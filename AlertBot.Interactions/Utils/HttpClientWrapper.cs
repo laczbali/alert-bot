@@ -112,12 +112,16 @@ namespace AlertBot.Interactions.Utils
 
 		private void HandleRateLimit(HttpResponseHeaders headers)
 		{
-			var remaining = int.Parse(headers.GetValues("X-RateLimit-Remaining").FirstOrDefault());
-			if(remaining == 1)
+			IEnumerable<string> headerValues;
+			if(headers.TryGetValues("X-RateLimit-Remaining", out headerValues))
 			{
-				var headerVal = headers.GetValues("X-RateLimit-Reset-After").FirstOrDefault().Replace(".", ",");
-				var resetAfterSec = float.Parse(headerVal);
-				Thread.Sleep((int)(resetAfterSec * 1000));
+				var remaining = int.Parse(headerValues.FirstOrDefault());
+				if (remaining == 1)
+				{
+					var headerVal = headers.GetValues("X-RateLimit-Reset-After").FirstOrDefault().Replace(".", ",");
+					var resetAfterSec = float.Parse(headerVal);
+					Thread.Sleep((int)(resetAfterSec * 1000));
+				}
 			}
 		}
 	}

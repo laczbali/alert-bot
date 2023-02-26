@@ -37,8 +37,6 @@ namespace AlertBot.Interactions.Clients.Discord
             return;
         }
 
-		public async Task UpdateGlobalCommands(IEnumerable<ApplicationCommand> commands) => await RegisterGlobalCommands(commands);
-
 		public bool InteractionRequestIsValid(IHeaderDictionary requestHeaders, string requestBody)
         {
             var signatureHeader = requestHeaders["X-Signature-Ed25519"].FirstOrDefault();
